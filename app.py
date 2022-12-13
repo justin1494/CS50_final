@@ -1,9 +1,9 @@
-from flask import Flask, render_template, redirect, request, session, url_for
+from flask import Flask, render_template, redirect, request, session
 from flask_session import Session
 from markupsafe import escape
 from werkzeug.security import check_password_hash, generate_password_hash
 import sqlite3
-from scraper import find_title, find_text
+from scraper import find_title
 from helpers import login_required
 
 app = Flask(__name__)
