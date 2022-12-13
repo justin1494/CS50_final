@@ -1,8 +1,10 @@
-from flask import Flask, render_template, redirect, request, session
+from flask import Flask, render_template, redirect, request, session, url_for
 from flask_session import Session
 from markupsafe import escape
 from werkzeug.security import check_password_hash, generate_password_hash
 import sqlite3
+from scraper import find_title, find_text
+from helpers import login_required
 
 app = Flask(__name__)
 
@@ -82,32 +84,31 @@ def register():
             request.form.get("password"), method='pbkdf2:sha256', salt_length=8)))
 
         connection.commit()
+        return redirect('/')
 
-    """Register user"""
     return render_template("./register.html")
 
 
-@app.route('/')
+@app.route('/', methods=["GET", "POST"])
+@login_required
 def index():
+    current_user = session["user_id"]
+    if request.method == "POST":
 
-    # con = sqlite3.connect("app.db")
+        cursor.execute("INSERT INTO articles (url, title, user_id) VALUES (?, ?, ?)", (request.form.get("URL"), find_title(request.form.get("URL")), current_user)).fetchall()
+        connection.commit()
 
-    # cur = con.cursor()
+        return redirect("/")
+    
+    urls = cursor.execute(f"SELECT title, url, id FROM articles WHERE user_id IS {current_user}").fetchall()
 
-    # # execute the command to fetch all the data from the table emp
-    # res = cur.execute("SELECT * FROM users")
-
-    # # store all the fetched data in the ans variable
-    # ans = res.fetchall()
-
-    # print(ans)
-
-    # con.close()
-
-    return render_template("layout.html")
+    return render_template("index.html", urls=urls)
 
 
-@app.route('/user/<username>')
-def show_user_profile(username):
-    # show the user profile for that user
-    return f'User {escape(username)}'
+@app.route('/delete/article', methods=['POST'])
+@login_required
+def delete():
+    if request.method == "POST":
+        request.form.get("post-id")
+        cursor.execute(f"DELETE FROM articles WHERE id IS {request.form.get('post-id')}")
+        return redirect('/')
