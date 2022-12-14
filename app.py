@@ -3,8 +3,8 @@ from flask_session import Session
 from markupsafe import escape
 from werkzeug.security import check_password_hash, generate_password_hash
 import sqlite3
-from scraper import find_title
-from helpers import login_required
+from helpers.scraper import find_title
+from helpers.helpers import login_required
 
 app = Flask(__name__)
 
@@ -20,7 +20,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # connection for SQL
-connection = sqlite3.connect('app.db', check_same_thread=False)
+connection = sqlite3.connect('./db/app.db', check_same_thread=False)
 cursor = connection.cursor()
 
 @app.route("/logout")
